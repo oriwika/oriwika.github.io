@@ -1,0 +1,185 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>使用docker容器镜像，三步快速部署frp内网穿透 | yu's blog</title><meta name="author" content="lhy HFUT"><meta name="copyright" content="lhy HFUT"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="使用docker容器镜像，三步快速部署frp内网穿透前置：1.需要一台拥有公网ip的服务器且正确安装了docker目标：假设我在本地4000端口部署了网站想让公网上别人访问到，或者玩游戏我的世界想与不在局域网内的小伙伴联机，而正好你有一台公网ip的服务器，那么本篇文章很适合你开始第一步：按下面编写服务端的frps.ini和客户端的frps.ini（无需下载，自己创建，然后用文本编辑器编辑） 123">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用docker容器镜像，三步快速部署frp内网穿透">
+<meta property="og:url" content="http://lhy.plus/2023/09/11/%E4%BD%BF%E7%94%A8docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%EF%BC%8C%E4%B8%89%E6%AD%A5%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2frp%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/index.html">
+<meta property="og:site_name" content="yu&#39;s blog">
+<meta property="og:description" content="使用docker容器镜像，三步快速部署frp内网穿透前置：1.需要一台拥有公网ip的服务器且正确安装了docker目标：假设我在本地4000端口部署了网站想让公网上别人访问到，或者玩游戏我的世界想与不在局域网内的小伙伴联机，而正好你有一台公网ip的服务器，那么本篇文章很适合你开始第一步：按下面编写服务端的frps.ini和客户端的frps.ini（无需下载，自己创建，然后用文本编辑器编辑） 123">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://pan.lhy.plus/img/frptopimg.png">
+<meta property="article:published_time" content="2023-09-11T02:00:00.000Z">
+<meta property="article:modified_time" content="2023-09-11T07:28:16.678Z">
+<meta property="article:author" content="lhy HFUT">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://pan.lhy.plus/img/frptopimg.png"><link rel="shortcut icon" href="/assets/head.jpg"><link rel="canonical" href="http://lhy.plus/2023/09/11/%E4%BD%BF%E7%94%A8docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%EF%BC%8C%E4%B8%89%E6%AD%A5%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2frp%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":200},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '使用docker容器镜像，三步快速部署frp内网穿透',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: true,
+  isToc: true,
+  postUpdate: '2023-09-11 15:28:16'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+
+if (false) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/assets/head.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">1</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-heartbeat"></i><span> 清单</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/Gallery/"><i class="fa-fw fas fa-images"></i><span> 照片</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('http://pan.lhy.plus/img/frptopimg.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">yu's blog</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-heartbeat"></i><span> 清单</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/Gallery/"><i class="fa-fw fas fa-images"></i><span> 照片</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">使用docker容器镜像，三步快速部署frp内网穿透</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-11T02:00:00.000Z" title="发表于 2023-09-11 10:00:00">2023-09-11</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-11T07:28:16.678Z" title="更新于 2023-09-11 15:28:16">2023-09-11</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">595</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>2分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="使用docker容器镜像，三步快速部署frp内网穿透"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="使用docker容器镜像，三步快速部署frp内网穿透"><a href="#使用docker容器镜像，三步快速部署frp内网穿透" class="headerlink" title="使用docker容器镜像，三步快速部署frp内网穿透"></a>使用docker容器镜像，三步快速部署frp内网穿透</h1><h2 id="前置：1-需要一台拥有公网ip的服务器且正确安装了docker"><a href="#前置：1-需要一台拥有公网ip的服务器且正确安装了docker" class="headerlink" title="前置：1.需要一台拥有公网ip的服务器且正确安装了docker"></a>前置：1.需要一台拥有公网ip的服务器且正确安装了docker</h2><h4 id="目标：假设我在本地4000端口部署了网站想让公网上别人访问到，或者玩游戏我的世界想与不在局域网内的小伙伴联机，而正好你有一台公网ip的服务器，那么本篇文章很适合你"><a href="#目标：假设我在本地4000端口部署了网站想让公网上别人访问到，或者玩游戏我的世界想与不在局域网内的小伙伴联机，而正好你有一台公网ip的服务器，那么本篇文章很适合你" class="headerlink" title="目标：假设我在本地4000端口部署了网站想让公网上别人访问到，或者玩游戏我的世界想与不在局域网内的小伙伴联机，而正好你有一台公网ip的服务器，那么本篇文章很适合你"></a>目标：假设我在本地4000端口部署了网站想让公网上别人访问到，或者玩游戏我的世界想与不在局域网内的小伙伴联机，而正好你有一台公网ip的服务器，那么本篇文章很适合你</h4><h2 id="开始"><a href="#开始" class="headerlink" title="开始"></a>开始</h2><h3 id="第一步："><a href="#第一步：" class="headerlink" title="第一步："></a>第一步：</h3><p>按下面编写服务端的frps.ini和客户端的frps.ini（无需下载，自己创建，然后用文本编辑器编辑）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"># 服务端frps.ini</span><br><span class="line">[common]</span><br><span class="line"># 监听端口</span><br><span class="line">bind_port = 7000</span><br><span class="line"># 面板端口</span><br><span class="line">dashboard_port = 7500</span><br><span class="line"># 登录面板账号设置</span><br><span class="line">dashboard_user = admin  # 可以自行设置账号密码</span><br><span class="line">dashboard_pwd = 123456</span><br><span class="line"></span><br><span class="line"># 身份验证</span><br><span class="line">token = 12345678  # 随便，但是必须和frpc.ini中的一致</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># 客户端frpc.ini</span><br><span class="line">[common]</span><br><span class="line">server_addr = 123.123.123.123        # &lt; - - - 这里替换成你的服务器的公网ip</span><br><span class="line"># 服务端监听端口</span><br><span class="line">server_port = 7000</span><br><span class="line"># 身份验证</span><br><span class="line">token = 12345678   # 与frps.ini一致，可自行修改</span><br><span class="line"></span><br><span class="line"># 编写端口规则，下面以4000端口为例</span><br><span class="line">[hexo]  # 名称，随便写</span><br><span class="line">type = tcp</span><br><span class="line">local_ip = 192.168.110.247  # 由于docker的特殊性,不可以写本机127.0.0.1，但可以写局域网内设备的ip</span><br><span class="line">local_port = 4000    # 本地需要映射的端口</span><br><span class="line">remote_port = 4001   # 本地映射到公网的端口</span><br></pre></td></tr></table></figure>
+
+<h2 id="将上述两个ini文件保存到你能找到的路径，下一步有用"><a href="#将上述两个ini文件保存到你能找到的路径，下一步有用" class="headerlink" title="将上述两个ini文件保存到你能找到的路径，下一步有用"></a>将上述两个ini文件保存到你能找到的路径，下一步有用</h2><h3 id="第二步："><a href="#第二步：" class="headerlink" title="第二步："></a>第二步：</h3><p>服务端执行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --restart=always --network host -d -v %你的frps.ini的路径%/frps.ini:/etc/frp/frps.ini --name frps snowdreamtech/frps</span><br></pre></td></tr></table></figure>
+
+<p>客户端执行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --restart=always --network host -d -v %你的frpc.ini的路径%/frpc.ini:/etc/frp/frpc.ini --name frpc snowdreamtech/frpc</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="第三步："><a href="#第三步：" class="headerlink" title="第三步："></a>第三步：</h3><h5 id="设置防火墙"><a href="#设置防火墙" class="headerlink" title="设置防火墙"></a>设置防火墙</h5><p>服务端防火墙开放端口：7000，7500，本地映射到公网的端口</p>
+<p>客户端防火墙开放端口：7000，你想要本地映射出去的端口</p>
+<h5 id="如果这一步嫌麻烦且不在乎安全的话，可以直接关闭防火墙（haha）"><a href="#如果这一步嫌麻烦且不在乎安全的话，可以直接关闭防火墙（haha）" class="headerlink" title="如果这一步嫌麻烦且不在乎安全的话，可以直接关闭防火墙（haha）"></a>如果这一步嫌麻烦且不在乎安全的话，可以直接关闭防火墙（haha）</h5><h5 id="访问frp后台面板（可选）"><a href="#访问frp后台面板（可选）" class="headerlink" title="访问frp后台面板（可选）"></a>访问frp后台面板（可选）</h5><p>http:&#x2F;&#x2F;服务器ip:7500&#x2F;</p>
+<p>进去后登录frps.ini里设置的账号密码，这里可以监控流量等</p>
+<h2 id="大功告成"><a href="#大功告成" class="headerlink" title="大功告成"></a>大功告成</h2><p>访问 服务器ip:4001, 进入了本地4000端口部署的页面</p>
+<p>tip：如果不行一定多检查防火墙，确保开放了对应端口</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="http://lhy.plus">lhy HFUT</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://lhy.plus/2023/09/11/%E4%BD%BF%E7%94%A8docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%EF%BC%8C%E4%B8%89%E6%AD%A5%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2frp%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/">http://lhy.plus/2023/09/11/%E4%BD%BF%E7%94%A8docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%EF%BC%8C%E4%B8%89%E6%AD%A5%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2frp%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://lhy.plus" target="_blank">yu's blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="http://pan.lhy.plus/img/frptopimg.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/assets/head.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">lhy HFUT</div><div class="author-info__description">个人blog</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">1</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/oriwika"><i class="fab fa-github"></i><span>我的github</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/oriwika" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:lhy15255@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://space.bilibili.com/62535306" target="_blank" title="哔哩哔哩"><i class="fa-brands fa-bilibili"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content"><center>主域名：<br><a target="_blank" rel="noopener" href="https://www.lhy.plus"><b><font color="#FFABBC">lhy.plus</font></b></a><br>免费gpt<br><a target="_blank" rel="noopener" href="http://47.113.144.172:3000/"><b><font color="#FFABBC">chatGPT-3.5</font></b></a></center></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%EF%BC%8C%E4%B8%89%E6%AD%A5%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2frp%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F"><span class="toc-number">1.</span> <span class="toc-text">使用docker容器镜像，三步快速部署frp内网穿透</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E7%BD%AE%EF%BC%9A1-%E9%9C%80%E8%A6%81%E4%B8%80%E5%8F%B0%E6%8B%A5%E6%9C%89%E5%85%AC%E7%BD%91ip%E7%9A%84%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%94%E6%AD%A3%E7%A1%AE%E5%AE%89%E8%A3%85%E4%BA%86docker"><span class="toc-number">1.1.</span> <span class="toc-text">前置：1.需要一台拥有公网ip的服务器且正确安装了docker</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%9B%AE%E6%A0%87%EF%BC%9A%E5%81%87%E8%AE%BE%E6%88%91%E5%9C%A8%E6%9C%AC%E5%9C%B04000%E7%AB%AF%E5%8F%A3%E9%83%A8%E7%BD%B2%E4%BA%86%E7%BD%91%E7%AB%99%E6%83%B3%E8%AE%A9%E5%85%AC%E7%BD%91%E4%B8%8A%E5%88%AB%E4%BA%BA%E8%AE%BF%E9%97%AE%E5%88%B0%EF%BC%8C%E6%88%96%E8%80%85%E7%8E%A9%E6%B8%B8%E6%88%8F%E6%88%91%E7%9A%84%E4%B8%96%E7%95%8C%E6%83%B3%E4%B8%8E%E4%B8%8D%E5%9C%A8%E5%B1%80%E5%9F%9F%E7%BD%91%E5%86%85%E7%9A%84%E5%B0%8F%E4%BC%99%E4%BC%B4%E8%81%94%E6%9C%BA%EF%BC%8C%E8%80%8C%E6%AD%A3%E5%A5%BD%E4%BD%A0%E6%9C%89%E4%B8%80%E5%8F%B0%E5%85%AC%E7%BD%91ip%E7%9A%84%E6%9C%8D%E5%8A%A1%E5%99%A8%EF%BC%8C%E9%82%A3%E4%B9%88%E6%9C%AC%E7%AF%87%E6%96%87%E7%AB%A0%E5%BE%88%E9%80%82%E5%90%88%E4%BD%A0"><span class="toc-number">1.1.0.1.</span> <span class="toc-text">目标：假设我在本地4000端口部署了网站想让公网上别人访问到，或者玩游戏我的世界想与不在局域网内的小伙伴联机，而正好你有一台公网ip的服务器，那么本篇文章很适合你</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%80%E5%A7%8B"><span class="toc-number">1.2.</span> <span class="toc-text">开始</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A"><span class="toc-number">1.2.1.</span> <span class="toc-text">第一步：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%86%E4%B8%8A%E8%BF%B0%E4%B8%A4%E4%B8%AAini%E6%96%87%E4%BB%B6%E4%BF%9D%E5%AD%98%E5%88%B0%E4%BD%A0%E8%83%BD%E6%89%BE%E5%88%B0%E7%9A%84%E8%B7%AF%E5%BE%84%EF%BC%8C%E4%B8%8B%E4%B8%80%E6%AD%A5%E6%9C%89%E7%94%A8"><span class="toc-number">1.3.</span> <span class="toc-text">将上述两个ini文件保存到你能找到的路径，下一步有用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A"><span class="toc-number">1.3.1.</span> <span class="toc-text">第二步：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%9A"><span class="toc-number">1.3.2.</span> <span class="toc-text">第三步：</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%AE%BE%E7%BD%AE%E9%98%B2%E7%81%AB%E5%A2%99"><span class="toc-number">1.3.2.0.1.</span> <span class="toc-text">设置防火墙</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%A6%82%E6%9E%9C%E8%BF%99%E4%B8%80%E6%AD%A5%E5%AB%8C%E9%BA%BB%E7%83%A6%E4%B8%94%E4%B8%8D%E5%9C%A8%E4%B9%8E%E5%AE%89%E5%85%A8%E7%9A%84%E8%AF%9D%EF%BC%8C%E5%8F%AF%E4%BB%A5%E7%9B%B4%E6%8E%A5%E5%85%B3%E9%97%AD%E9%98%B2%E7%81%AB%E5%A2%99%EF%BC%88haha%EF%BC%89"><span class="toc-number">1.3.2.0.2.</span> <span class="toc-text">如果这一步嫌麻烦且不在乎安全的话，可以直接关闭防火墙（haha）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%AE%BF%E9%97%AEfrp%E5%90%8E%E5%8F%B0%E9%9D%A2%E6%9D%BF%EF%BC%88%E5%8F%AF%E9%80%89%EF%BC%89"><span class="toc-number">1.3.2.0.3.</span> <span class="toc-text">访问frp后台面板（可选）</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%A7%E5%8A%9F%E5%91%8A%E6%88%90"><span class="toc-number">1.4.</span> <span class="toc-text">大功告成</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2023/09/11/%E4%BD%BF%E7%94%A8docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%EF%BC%8C%E4%B8%89%E6%AD%A5%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2frp%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/" title="使用docker容器镜像，三步快速部署frp内网穿透"><img src="http://pan.lhy.plus/img/frptopimg.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="使用docker容器镜像，三步快速部署frp内网穿透"/></a><div class="content"><a class="title" href="/2023/09/11/%E4%BD%BF%E7%94%A8docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%EF%BC%8C%E4%B8%89%E6%AD%A5%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2frp%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/" title="使用docker容器镜像，三步快速部署frp内网穿透">使用docker容器镜像，三步快速部署frp内网穿透</a><time datetime="2023-09-11T02:00:00.000Z" title="发表于 2023-09-11 10:00:00">2023-09-11</time></div></div></div></div></div></div></main><footer id="footer" style="background: rgba(0, 0, 0, 0)"><div id="footer-wrap"><div class="copyright">&copy;2023 By lhy HFUT</div><div class="footer_custom_text">Every new day is another chance to change your life.</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"></div><script id="canvas_nest" defer="defer" color="255,192,203" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = false;
+POWERMODE.mobile = true;
+document.body.addEventListener('input', POWERMODE);
+</script><script id="click-show-text" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/click-show-text.min.js" data-mobile="true" data-text="富强,民主,文明,和谐,自由,平等,公正,法治,爱国,敬业,诚信,友善" data-fontsize="15px" data-random="true" async="async"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
